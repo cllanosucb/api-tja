@@ -7,9 +7,8 @@ app.use(express.urlencoded({ extended: false }))
 // parse application/json
 app.use(express.json())
 
-app.get('/', function (req, res) {
-  res.json('Hello World')
-})
+//Configuracion global de rutas
+app.use('/api', require('./routes/index'))
  
 app.listen(process.env.PORT, () => {
     console.log("Escuchando puerto: ", process.env.PORT);
