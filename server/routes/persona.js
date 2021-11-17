@@ -14,6 +14,12 @@ const {
 
 const app = express();
 
+app.get('/prueba', async(req, res) => {
+    res.json({
+        msg: "Ruta /api/persona/prueba"
+    })
+})
+
 app.get('/', async(req, res) => {
 
     sql = 'SELECT * FROM personas WHERE doc_identidad = :id';
