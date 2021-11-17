@@ -13,7 +13,9 @@ const schemaUsuario = yup.object().shape({
     sexo: yup.string().required(),
     fecha_nacimiento: yup.string().required(),
     email: yup.string().email().required(),
-    lms_id: yup.number().required()
+    lms_id_usuario: yup.number().required(),
+    lms_id_materia: yup.number().required(),
+    num_sec_servicio: yup.number().required(),
 });
 
 const schemaInscripcion = yup.object().shape({
