@@ -1,11 +1,11 @@
 require('dotenv').config();
 const oracledb = require('oracledb');
 
-const config = {
+/* const config = {
     user: 'NEO_DES',
     password: 'TuCarnet.',
     connectString: '172.22.3.5:1521/UCBT'
-};
+}; */
 
 /* const config = {
     user: 'PRUEBA-DB3',
@@ -13,11 +13,11 @@ const config = {
     connectString: 'localhost:1521/xe'
 }; */
 
-/* const config = {
+const config = {
     user: process.env.USER,
     password: process.env.PASSWORD,
     connectString: process.env.CONNECTSTRING
-}; */
+};
 
 async function query(sql, binds, commit) {
     let conn

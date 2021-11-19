@@ -1,12 +1,12 @@
-require('./config/config')
+require('./config/config');
 require('dotenv').config();
-const { job_inscripcion } = require('./tools/jobs')
+const { job_inscripcion } = require('./tools/jobs');
 const CronJob = require('cron').CronJob;
-const express = require('express')
-const app = express()
-    // var job = new CronJob(process.env.CRON_TIME, job_inscripcion);
-    // job.start();
-    // parse application/x-www-form-urlencoded
+const express = require('express');
+const app = express();
+var job = new CronJob(process.env.CRON_TIME, job_inscripcion);
+job.start();
+// parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }))
     // parse application/json
 app.use(express.json())
