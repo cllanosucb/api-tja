@@ -24,7 +24,8 @@ app.get('/', async(req, res) => {
     const binds = [7209948];
     //db.open(sql, [id], false, res);
     const result = await db.query(sql, binds, false);
-    res.json(result.rows[0])
+    console.log(result.result);
+    res.json(result.result)
 })
 
 app.post('/registro/inscripcion/ucbonline', validSchemaUsuario, async(req, res) => {
@@ -40,64 +41,98 @@ app.post('/registro/inscripcion/ucbonline', validSchemaUsuario, async(req, res) 
     let CEDULA_IDENTIDAD = doc_identidad
     let EMAIL = email;
     let LMS_ID_USUARIO = lms_id_usuario;
+    const sqlsecuenciador = 'SELECT MAX(NUM_SEC_PERSONA) as NUM_SEC_PERSONA FROM WEB.USUARIOS_UCB_ONLINE'
     const sqlexiste = 'SELECT * FROM PERSONAS WHERE CEDULA_IDENTIDAD LIKE :doc_identidad';
-    const sqlinsertuser = `DECLARE
-        x_num_sec NUMBER;
-        BEGIN
-        INSERT INTO PERSONAS(TIPO, DOC_IDENTIDAD, TIPO_DOC, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD)VALUES (${TIPO}, ${DOC_IDENTIDAD}, ${TIPO_DOC}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}');
-        SELECT NUM_SEC INTO x_num_sec
-        FROM PERSONAS
-        WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
-        INSERT INTO USUARIOS_UCB_ONLINE (NUM_SEC_PERSONA, DOC_IDENTIDAD, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD, EMAIL, LMS_ID_USUARIO)VALUES (x_num_sec, ${DOC_IDENTIDAD}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}', '${EMAIL}', ${LMS_ID_USUARIO});
-        INSERT INTO INSCRIPCION_UCB_ONLINE (LMS_ID_USUARIO, LMS_ID_MATERIA, NUM_SEC_SERVICIO) VALUES (${lms_id_usuario}, ${lms_id_materia}, ${num_sec_servicio});
-        COMMIT;
-        END;`;
-    const sqlinsertucbonline = `DECLARE
-        data NUMBER;
-        x_num_sec NUMBER;
-        BEGIN
-        SELECT COUNT(*) INTO data
-        FROM USUARIOS_UCB_ONLINE
-        WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
-        IF data = 0 THEN
-        SELECT NUM_SEC INTO x_num_sec
-        FROM PERSONAS
-        WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
-        INSERT INTO USUARIOS_UCB_ONLINE (NUM_SEC_PERSONA, DOC_IDENTIDAD, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD, EMAIL, LMS_ID_USUARIO)VALUES (x_num_sec, ${DOC_IDENTIDAD}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}', '${EMAIL}', ${LMS_ID_USUARIO});
-        INSERT INTO INSCRIPCION_UCB_ONLINE (LMS_ID_USUARIO, LMS_ID_MATERIA, NUM_SEC_SERVICIO) VALUES (${lms_id_usuario}, ${lms_id_materia}, ${num_sec_servicio});
-        COMMIT;
-        END IF;
-        END;`;
+    const sec_resp = await db.query(sqlsecuenciador, [], true);
+    if (sec_resp.status) {
+        console.log(sec_resp.result.rows);
+        const sec_nextval = sec_resp.result.rows.length > 0 ? sec_resp.result.rows[0].NUM_SEC_PERSONA + 10 : 10000004
+        console.log("sec_nextval", sec_nextval);
 
-    const existe = await db.query(sqlexiste, [CEDULA_IDENTIDAD], true);
-    if (!existe.status) {
-        return error(res, existe);
-    } else {
-        if (existe.result.rows.length > 0) {
-            const insertuserucb = await db.query(sqlinsertucbonline, [], true);
-            console.log("insertuserucb ", insertuserucb);
+        const existe = await db.query(sqlexiste, [CEDULA_IDENTIDAD], true);
+        if (!existe.status) {
+            return error(res, existe);
+        } else {
+            const sqlinsertuser = `DECLARE
+                x_num_sec NUMBER;
+                BEGIN
+                INSERT INTO PERSONAS(NUM_SEC, TIPO, DOC_IDENTIDAD, TIPO_DOC, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD)VALUES (${sec_nextval}, ${TIPO}, ${DOC_IDENTIDAD}, ${TIPO_DOC}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}');
+                SELECT NUM_SEC INTO x_num_sec
+                FROM PERSONAS
+                WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
+                INSERT INTO WEB.USUARIOS_UCB_ONLINE (NUM_SEC_PERSONA, DOC_IDENTIDAD, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD, EMAIL, LMS_ID_USUARIO)VALUES (x_num_sec, ${DOC_IDENTIDAD}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}', '${EMAIL}', ${LMS_ID_USUARIO});
+                INSERT INTO WEB.INSCRIPCION_UCB_ONLINE (LMS_ID_USUARIO, LMS_ID_MATERIA, NUM_SEC_SERVICIO, ESTADO_PAGO) VALUES (${lms_id_usuario}, ${lms_id_materia}, ${num_sec_servicio}, 0);
+                COMMIT;
+                END;`;
+            const sqlinsertucbonline = `DECLARE
+            data NUMBER;
+            x_num_sec NUMBER;
+            data_ins NUMBER;
+            BEGIN
+            SELECT COUNT(*) INTO data
+            FROM WEB.USUARIOS_UCB_ONLINE
+            WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
+            IF data = 0 THEN
+                SELECT NUM_SEC INTO x_num_sec
+                FROM PERSONAS
+                WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
+                INSERT INTO WEB.USUARIOS_UCB_ONLINE (NUM_SEC_PERSONA, DOC_IDENTIDAD, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD, EMAIL, LMS_ID_USUARIO)VALUES (x_num_sec, ${DOC_IDENTIDAD}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}', '${EMAIL}', ${LMS_ID_USUARIO});
+                INSERT INTO WEB.INSCRIPCION_UCB_ONLINE (LMS_ID_USUARIO, LMS_ID_MATERIA, NUM_SEC_SERVICIO, ESTADO_PAGO) VALUES (${lms_id_usuario}, ${lms_id_materia}, ${num_sec_servicio}, 0);
+            ELSE
+                SELECT COUNT(*) INTO data_ins
+                FROM WEB.INSCRIPCION_UCB_ONLINE
+                WHERE (LMS_ID_USUARIO = ${lms_id_usuario} AND LMS_ID_MATERIA = ${lms_id_materia});
+                IF data_ins = 0 THEN
+                    INSERT INTO WEB.INSCRIPCION_UCB_ONLINE (LMS_ID_USUARIO, LMS_ID_MATERIA, NUM_SEC_SERVICIO, ESTADO_PAGO) VALUES (${lms_id_usuario}, ${lms_id_materia}, ${num_sec_servicio}, 0);
+                END IF;
+            END IF;
+            COMMIT;
+            END;`;
+            /*const sqlinsertucbonline = `DECLARE
+                data NUMBER;
+                x_num_sec NUMBER;
+                BEGIN
+                SELECT COUNT(*) INTO data
+                FROM WEB.USUARIOS_UCB_ONLINE
+                WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
+                IF data = 0 THEN
+                SELECT NUM_SEC INTO x_num_sec
+                FROM PERSONAS
+                WHERE CEDULA_IDENTIDAD LIKE '${CEDULA_IDENTIDAD}';
+                INSERT INTO WEB.USUARIOS_UCB_ONLINE (NUM_SEC_PERSONA, DOC_IDENTIDAD, AP_PATERNO, AP_MATERNO, NOMBRES, SEXO, FECHA_NACIMIENTO, CEDULA_IDENTIDAD, EMAIL, LMS_ID_USUARIO)VALUES (x_num_sec, ${DOC_IDENTIDAD}, '${AP_PATERNO}', '${AP_MATERNO}', '${NOMBRES}', ${SEXO}, to_date('${FECHA_NACIMIENTO}', 'YYYY-MM-DD'), '${CEDULA_IDENTIDAD}', '${EMAIL}', ${LMS_ID_USUARIO});
+                INSERT INTO WEB.INSCRIPCION_UCB_ONLINE (LMS_ID_USUARIO, LMS_ID_MATERIA, NUM_SEC_SERVICIO, ESTADO_PAGO) VALUES (${lms_id_usuario}, ${lms_id_materia}, ${num_sec_servicio}, 0);
+                COMMIT;
+                END IF;
+                END;`;*/
+            if (existe.result.rows.length > 0) {
+                const insertuserucb = await db.query(sqlinsertucbonline, [], true);
+                console.log("insertuserucb ", insertuserucb);
+                await updateUserNeo(CEDULA_IDENTIDAD, lms_id_usuario);
+                if (insertuserucb.status) {
+                    return success(res, insertuserucb);
+                } else {
+                    return error(res, insertuserucb);
+                }
+            }
+            const insertPersonas = await db.query(sqlinsertuser, [], true);
+            console.log("insertPersonas ", insertPersonas);
             await updateUserNeo(CEDULA_IDENTIDAD, lms_id_usuario);
-            if (insertuserucb.status) {
-                return success(res, insertuserucb);
+            if (!insertPersonas.status) {
+                return error(res, insertPersonas);
             } else {
-                return error(res, insertuserucb);
+                return success(res, insertPersonas);
             }
         }
-        const insertPersonas = await db.query(sqlinsertuser, [], true);
-        console.log("insertPersonas ", insertPersonas);
-        await updateUserNeo(CEDULA_IDENTIDAD, lms_id_usuario);
-        if (!insertPersonas.status) {
-            return error(res, insertPersonas);
-        } else {
-            return success(res, insertPersonas);
-        }
+
+    } else {
+        return error(res, sec_resp);
     }
 
 })
 
 const updateUserNeo = async(cedula_identidad, lms_id_usuario) => {
     // acutualizar datos de usuario con el mun_sec_persona
-    const sqluser = "SELECT NUM_SEC_PERSONA FROM USUARIOS_UCB_ONLINE WHERE CEDULA_IDENTIDAD LIKE :CEDULA_IDENTIDAD";
+    const sqluser = "SELECT NUM_SEC_PERSONA FROM WEB.USUARIOS_UCB_ONLINE WHERE CEDULA_IDENTIDAD LIKE :CEDULA_IDENTIDAD";
     const dataUser = await db.query(sqluser, [cedula_identidad], true);
     num_sec_persona = dataUser.status ? dataUser.result.rows[0].NUM_SEC_PERSONA : ''
     const response = await fetch(`${process.env.URL}/update_user?api_key=${process.env.API_KEY}&id=${lms_id_usuario}&num_sec_persona=${num_sec_persona}`);

@@ -13,21 +13,23 @@ const job_inscripcion = async() => {
 
 const listaincripciones = async() => {
     const sql = `SELECT *
-    FROM INSCRIPCION_UCB_ONLINE i, USUARIOS_UCB_ONLINE u
+    FROM WEB.INSCRIPCION_UCB_ONLINE i, WEB.USUARIOS_UCB_ONLINE u
     WHERE (i.LMS_ID_USUARIO = u.LMS_ID_USUARIO AND i.ESTADO_PAGO = 0)`;
     const resp = await db.query(sql, [], true);
+    console.log("resp1", resp);
     return resp.status ? resp.result.rows : [];
 }
 
 const verificarpago = (lista) => {
-    const sqlpago = "SELECT * FROM PAGOS WHERE(NUM_SEC_USUARIO = :NUM_SEC_USUARIO AND NUM_SEC_SERVICIO = :NUM_SEC_SERVICIO)";
-    // const sqlpago = "SELECT * FROM CAJA_DETALLES WHERE (NUM_SEC_ANALITICO = :NUM_SEC_USUARIO AND NUM_SEC_SERVICIO = :NUM_SEC_SERVICIO);";
-    const sqlupdate = "UPDATE USUARIOS_UCB_ONLINE SET EMAIL_INSTITUCIONAL = :EMAIL_INSTITUCIONAL, PASSWORD_INSTITUCIONAL = :PASSWORD WHERE LMS_ID_USUARIO = :LMS_ID_USUARIO";
-    const sqlupdateinscripcion = "UPDATE INSCRIPCION_UCB_ONLINE SET ESTADO_PAGO = :ESTADO WHERE LMS_ID_USUARIO = :LMS_ID_USUARIO AND LMS_ID_MATERIA = :LMS_ID_MATERIA";
+    // const sqlpago = "SELECT * FROM PAGOS WHERE(NUM_SEC_USUARIO = :NUM_SEC_USUARIO AND NUM_SEC_SERVICIO = :NUM_SEC_SERVICIO)";
+    const sqlpago = "SELECT * FROM CAJA_DETALLES WHERE (NUM_SEC_ANALITICO = :NUM_SEC_USUARIO AND NUM_SEC_SERVICIO = :NUM_SEC_SERVICIO);";
+    const sqlupdate = "UPDATE WEB.USUARIOS_UCB_ONLINE SET EMAIL_INSTITUCIONAL = :EMAIL_INSTITUCIONAL, PASSWORD_INSTITUCIONAL = :PASSWORD WHERE LMS_ID_USUARIO = :LMS_ID_USUARIO";
+    const sqlupdateinscripcion = "UPDATE WEB.INSCRIPCION_UCB_ONLINE SET ESTADO_PAGO = :ESTADO WHERE LMS_ID_USUARIO = :LMS_ID_USUARIO AND LMS_ID_MATERIA = :LMS_ID_MATERIA";
     lista.forEach(async user => {
         const resp = await db.query(sqlpago, /* [1111, 111] */ [user.NUM_SEC_PERSONA, user.NUM_SEC_SERVICIO], true);
         const data = resp.status ? resp.result.rows.length > 0 ? resp.result.rows[0] : null : null;
         console.log("data", data);
+        console.log("resp", resp);
         if (data != null) {
 
             /*if (data.EMAIL_INSTITUCIONAL == null) {

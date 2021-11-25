@@ -13,10 +13,16 @@ const oracledb = require('oracledb');
     connectString: 'localhost:1521/xe'
 }; */
 
-const config = {
+/* const config = {
     user: process.env.USER,
     password: process.env.PASSWORD,
     connectString: process.env.CONNECTSTRING
+}; */
+
+const config = {
+    user: 'NEO_DES',
+    password: 'TuCarnet.',
+    connectString: '172.22.3.99:1521/UCBP'
 };
 
 async function query(sql, binds, commit) {
