@@ -13,7 +13,7 @@ app.post('/registro', validSchemaMateria, async(req, res) => {
     const sqlmateria = `DECLARE
         data NUMBER;
         BEGIN
-        SELECT COUNT(*) INTO data FROM MATERIAS_UCB_ONLINE WHERE LMS_ID = ${lms_id};
+        SELECT COUNT(*) INTO data FROM MATERIAS_UCB_ONLINE WHERE LMS_ID_MATERIA = ${lms_id};
         IF data = 0 THEN
         INSERT INTO MATERIAS_UCB_ONLINE (LMS_ID_MATERIA, NOMBRE, FECHA_INICIO, FECHA_FIN, CREDITOS, ORGANIZACION, NUM_SEC_SERVICIO, COSTO) VALUES (${lms_id_materia}, '${nombre.toUpperCase()}', TO_DATE('${fecha_inicio}', 'YYYY-MM-DD'), TO_DATE('${fecha_fin}', 'YYYY-MM-DD'), ${creditos}, '${organizacion.toUpperCase()}', ${num_sec_servicio}, ${costo});
         COMMIT;
