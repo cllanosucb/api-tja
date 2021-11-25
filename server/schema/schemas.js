@@ -27,10 +27,10 @@ const schemaInscripcion = yup.object().shape({
 const schemaMateria = yup.object().shape({
     lms_id_materia: yup.number().required(),
     nombre: yup.string().required(),
-    fecha_inicio: yup.string().required(),
-    fecha_fin: yup.string().required(),
-    creditos: yup.number().required(),
-    organizacion: yup.string().required(),
+    fecha_inicio: yup.string(),
+    fecha_fin: yup.string(),
+    creditos: yup.number(),
+    organizacion: yup.string(),
     num_sec_servicio: yup.number().required(),
     costo: yup.number().required()
 });
