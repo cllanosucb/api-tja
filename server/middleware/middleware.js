@@ -3,7 +3,8 @@ const {
     schemaUsuario,
     schemaInscripcion,
     schemaMateria,
-    schemaInscripcionEstudiante
+    schemaInscripcionEstudiante,
+    schemaUsuarioInstructor
 } = require('../schema/schemas');
 
 let validSchemaAuth = async(req, res, next) => {
@@ -34,6 +35,24 @@ let validSchemaUsuario = async(req, res, next) => {
         let dataValidate = await schemaUsuario.validate(req.body)
         console.log("Resultado Validate ", dataValidate);
         console.log("Validacion de Datos Body ", valid);
+        if (!valid) {
+            res.status(400).json({
+                err: "error"
+            })
+        }
+        next();
+
+    } catch (error) {
+        res.json({
+            error
+        })
+    }
+}
+
+let validSchemaUsuarioInstructor = async(req, res, next) => {
+    try {
+        let valid = await schemaUsuarioInstructor.isValid(req.body)
+        let dataValidate = await schemaUsuarioInstructor.validate(req.body)
         if (!valid) {
             res.status(400).json({
                 err: "error"
@@ -117,5 +136,6 @@ module.exports = {
     validSchemaUsuario,
     validSchemaInscripcion,
     validSchemaMateria,
-    validSchemaInscripcionEstudiante
+    validSchemaInscripcionEstudiante,
+    validSchemaUsuarioInstructor
 }

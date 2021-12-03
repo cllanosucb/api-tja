@@ -18,6 +18,17 @@ const schemaUsuario = yup.object().shape({
     num_sec_servicio: yup.number().required(),
 });
 
+const schemaUsuarioInstructor = yup.object().shape({
+    lms_id_usuario: yup.number().required(),
+    doc_identidad: yup.string().required(),
+    ap_paterno: yup.string(),
+    ap_materno: yup.string(),
+    nombres: yup.string().required(),
+    sexo: yup.string(),
+    fecha_nacimiento: yup.string(),
+    email_personal: yup.string()
+});
+
 const schemaInscripcion = yup.object().shape({
     lms_id_materia: yup.number().required(),
     lms_id_usuario: yup.number().required(),
@@ -45,5 +56,6 @@ module.exports = {
     schemaUsuario,
     schemaInscripcion,
     schemaMateria,
-    schemaInscripcionEstudiante
+    schemaInscripcionEstudiante,
+    schemaUsuarioInstructor
 }

@@ -67,10 +67,10 @@ gsuitparams = (data) => {
     const params = {
         Parametros: {
             Encrypted: "0",
-            NsPersona: "51" + data.NUM_SEC_PERSONA,
-            NsRegional: "51",
-            NsPrograma: "513",
-            NsPeriodo: "517421",
+            NsPersona: "81" + data.NUM_SEC_PERSONA,
+            NsRegional: "81",
+            NsPrograma: "81000",
+            NsPeriodo: null,
             ApPaterno: "" + data.AP_PATERNO,
             ApMaterno: "" + data.AP_MATERNO,
             Nombres: "" + data.NOMBRES,
