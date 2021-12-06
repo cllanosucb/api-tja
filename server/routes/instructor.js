@@ -24,9 +24,9 @@ app.get('/generar/correo/institucional', validSchemaUsuarioInstructor, async(req
     console.log(usuario[0].email_institucional);
     if (usuario.length > 0 && usuario[0].email_institucional == null) {
         console.log("entra");
-        const respCorreo = generarCorreoInstitucional(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
+        const respCorreo = await generarCorreoInstitucional(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
         if (respCorreo.IsSuccess) {
-            const updateUsuario = actualizarInstructor(res, respCorreo.Response.Result.Email, respCorreo.Response.Result.Password, lms_id_usuario);
+            const updateUsuario = await actualizarInstructor(res, respCorreo.Response.Result.Email, respCorreo.Response.Result.Password, lms_id_usuario);
             return res.json({
                 ok: true,
                 datos_usuario: {
@@ -115,31 +115,34 @@ getUsuario = async(res, lms_id_usuario) => {
 
 generarCorreoInstitucional = async(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal) => {
     const params = emailParams(lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
-    console.log(params);
-    try {
-        const gsuitaccount = await fetch(process.env.URL_BACKEND_UCB, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Token': process.env.TOKEN_BACKEND_UCB,
-                'ClientCode': 'CREATE-ACCOUNT'
-            },
-            body: JSON.stringify(params)
-        });
-        console.log(gsuitaccount);
-        const dat = await gsuitaccount.json();
-        console.log("dat ", dat);
-        if (gsuitaccount.ok) {
-            const account = await gsuitaccount.json();
-            // console.log("account", account);
-            return account;
-            // email: account.Response.Result.Email,
-            // password: account.Response.Result.Password,
-        } else {
-            const resul = await gsuitaccount.json();
-            return resul;
-        }
-    } catch (err) {
+    console.log(JSON.stringify(params));
+    /* try { */
+    const gsuitaccount = await fetch(process.env.URL_BACKEND_UCB, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // 'Access-Control-Allow-Origin': '*',
+            'Token': process.env.TOKEN_BACKEND_UCB,
+            'ClientCode': 'CREATE-ACCOUNT'
+        },
+        body: JSON.stringify(params)
+    });
+    console.log(gsuitaccount);
+    const datos = await gsuitaccount.json();
+    console.log("datos", datos);
+    if (gsuitaccount.ok) {
+        // const account = await gsuitaccount.json();
+        // console.log("account", account);
+        return datos;
+        // email: account.Response.Result.Email,
+        // password: account.Response.Result.Password,
+    } else {
+        // console.log("else de peticion");
+        // const resul = await gsuitaccount.json();
+        // console.log(datos);
+        return datos;
+    }
+    /* } catch (err) {
         return res.status(500).json({
             ok: false,
             error: {
@@ -147,7 +150,7 @@ generarCorreoInstitucional = async(res, lms_id_usuario, doc_identidad, ap_patern
                 error: err
             }
         });
-    }
+    } */
 }
 
 actualizarInstructor = async(res, email_institucional, password, lms_id_usuario) => {
@@ -200,15 +203,15 @@ emailParams = (lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, s
             Encrypted: "0",
             NsPersona: "81" + lms_id_usuario,
             NsRegional: "81",
-            NsPrograma: "81000",
-            NsPeriodo: "817421",
+            NsPrograma: "817721",
+            NsPeriodo: "817721",
             ApPaterno: "" + ap_paterno.toUpperCase(),
-            ApMaterno: "" + ap_materno.toUpperCase(),
+            ApMaterno: "" + ap_materno != undefined ? ap_materno.toUpperCase() : "",
             Nombres: "" + nombres.toUpperCase(),
             Sexo: "" + sexo.toUpperCase() == 'HOMBRE' ? "1" : "2",
             Listas: "",
             Alias: "",
-            Tipo: "5",
+            Tipo: "1",
             EmailPersonal: "" + email_personal,
             DocIdentidad: "" + doc_identidad,
             Cargo: "",
