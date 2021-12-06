@@ -25,7 +25,8 @@ app.get('/generar/correo/institucional', validSchemaUsuarioInstructor, async(req
     if (usuario.length > 0 && usuario[0].email_institucional == null) {
         console.log("entra");
         const respCorreo = await generarCorreoInstitucional(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
-        if (respCorreo.IsSuccess) {
+        console.log(respCorreo);
+        if (respCorreo.Response.IsSuccess) {
             const updateUsuario = await actualizarInstructor(res, respCorreo.Response.Result.Email, respCorreo.Response.Result.Password, lms_id_usuario);
             return res.json({
                 ok: true,
@@ -116,33 +117,23 @@ getUsuario = async(res, lms_id_usuario) => {
 generarCorreoInstitucional = async(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal) => {
     const params = emailParams(lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
     console.log(JSON.stringify(params));
-    /* try { */
-    const gsuitaccount = await fetch(process.env.URL_BACKEND_UCB, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            // 'Access-Control-Allow-Origin': '*',
-            'Token': process.env.TOKEN_BACKEND_UCB,
-            'ClientCode': 'CREATE-ACCOUNT'
-        },
-        body: JSON.stringify(params)
-    });
-    console.log(gsuitaccount);
-    const datos = await gsuitaccount.json();
-    console.log("datos", datos);
-    if (gsuitaccount.ok) {
-        // const account = await gsuitaccount.json();
-        // console.log("account", account);
+    try {
+        const gsuitaccount = await fetch(process.env.URL_BACKEND_UCB, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                // 'Access-Control-Allow-Origin': '*',
+                'Token': process.env.TOKEN_BACKEND_UCB,
+                'ClientCode': 'CREATE-ACCOUNT'
+            },
+            body: JSON.stringify(params)
+        });
+        // console.log(gsuitaccount);
+        const datos = await gsuitaccount.json();
+        // console.log("datos", datos);
         return datos;
-        // email: account.Response.Result.Email,
-        // password: account.Response.Result.Password,
-    } else {
-        // console.log("else de peticion");
-        // const resul = await gsuitaccount.json();
-        // console.log(datos);
-        return datos;
-    }
-    /* } catch (err) {
+    } catch (err) {
         return res.status(500).json({
             ok: false,
             error: {
@@ -150,7 +141,7 @@ generarCorreoInstitucional = async(res, lms_id_usuario, doc_identidad, ap_patern
                 error: err
             }
         });
-    } */
+    }
 }
 
 actualizarInstructor = async(res, email_institucional, password, lms_id_usuario) => {
