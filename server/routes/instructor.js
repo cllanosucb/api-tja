@@ -24,22 +24,27 @@ app.post('/generar/correo/institucional', validSchemaUsuarioInstructor, async(re
         const insertInstructor = await registrarInstructor(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal)
         const usuario = await getUsuario(res, lms_id_usuario);
 
-        console.log(usuario[0].email_institucional);
+        console.log("email_institucional", usuario[0].email_institucional);
         if (usuario.length > 0 && usuario[0].email_institucional == null) {
-            console.log("entra");
             const respCorreo = await generarCorreoInstitucional(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
-            console.log(respCorreo);
+            console.log("respCorreo", respCorreo);
             if (respCorreo.Response.IsSuccess) {
                 const updateUsuario = await actualizarInstructor(res, respCorreo.Response.Result.Email, respCorreo.Response.Result.Password, lms_id_usuario);
+                const updateUsuarioNeo = await actualizarEmailNeo(res, respCorreo.Response.Result.Email, lms_id_usuario);
+                console.log('updateUsuario', updateUsuario);
+                console.log('updateUsuarioNeo', updateUsuarioNeo);
                 return res.json({
                     ok: true,
                     datos_usuario: {
                         lms_id_usuario,
                         datos_correo: respCorreo.Response.Result,
                     },
-                    insertInstructor,
-                    usuario,
-                    updateUsuario,
+                    procesos: {
+                        insertInstructor,
+                        usuario,
+                        updateUsuario,
+                        updateUsuarioNeo
+                    }
                 })
             } else {
                 return res.status(400).json({
