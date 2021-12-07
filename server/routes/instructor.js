@@ -17,44 +17,56 @@ app.get('', async(req, res) => {
 })
 
 app.get('/generar/correo/institucional', validSchemaUsuarioInstructor, async(req, res) => {
+    console.log('instructor/generar/correo/institucional');
     const { lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal } = req.body;
-    const insertInstructor = await registrarInstructor(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal)
-    const usuario = await getUsuario(res, lms_id_usuario);
+    try {
+        const insertInstructor = await registrarInstructor(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal)
+        const usuario = await getUsuario(res, lms_id_usuario);
 
-    console.log(usuario[0].email_institucional);
-    if (usuario.length > 0 && usuario[0].email_institucional == null) {
-        console.log("entra");
-        const respCorreo = await generarCorreoInstitucional(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
-        console.log(respCorreo);
-        if (respCorreo.Response.IsSuccess) {
-            const updateUsuario = await actualizarInstructor(res, respCorreo.Response.Result.Email, respCorreo.Response.Result.Password, lms_id_usuario);
-            return res.json({
-                ok: true,
-                datos_usuario: {
-                    lms_id_usuario,
-                    datos_correo: respCorreo.Response.Result,
-                },
-                insertInstructor,
-                usuario,
-                updateUsuario,
-            })
+        console.log(usuario[0].email_institucional);
+        if (usuario.length > 0 && usuario[0].email_institucional == null) {
+            console.log("entra");
+            const respCorreo = await generarCorreoInstitucional(res, lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal);
+            console.log(respCorreo);
+            if (respCorreo.Response.IsSuccess) {
+                const updateUsuario = await actualizarInstructor(res, respCorreo.Response.Result.Email, respCorreo.Response.Result.Password, lms_id_usuario);
+                return res.json({
+                    ok: true,
+                    datos_usuario: {
+                        lms_id_usuario,
+                        datos_correo: respCorreo.Response.Result,
+                    },
+                    insertInstructor,
+                    usuario,
+                    updateUsuario,
+                })
+            } else {
+                return res.status(400).json({
+                    ok: false,
+                    error: {
+                        mensaje: "Error al generar el correo institucional",
+                        error: respCorreo,
+                        usuario
+                    }
+                });
+            }
         } else {
             return res.status(400).json({
                 ok: false,
                 error: {
-                    mensaje: "Error al generar el correo institucional",
-                    error: respCorreo,
+                    mensaje: "El usuario ya cuenta con correo institucional",
+                    insertInstructor,
                     usuario
                 }
             });
         }
-    } else {
-        return res.status(400).json({
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
             ok: false,
             error: {
-                mensaje: "El usuario ya cuenta con correo institucional",
-                insertInstructor,
-                usuario
+                mensaje: "Error interno en el servidor",
+                error: err
             }
         });
     }

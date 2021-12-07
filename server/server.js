@@ -3,6 +3,10 @@ require('dotenv').config();
 const { job_inscripcion } = require('./tools/jobs');
 const CronJob = require('cron').CronJob;
 const express = require('express');
+// swagger
+// const swaggerUI = require('swagger-ui-express');
+// const swaggerJsDoc = require('swagger-jsdoc');
+
 const app = express();
 var job = new CronJob(process.env.CRON_TIME, job_inscripcion);
 // job.start();
@@ -10,9 +14,10 @@ var job = new CronJob(process.env.CRON_TIME, job_inscripcion);
 app.use(express.urlencoded({ extended: false }))
     // parse application/json
 app.use(express.json())
-
-//Configuracion global de rutas
-app.use('/api', require('./routes/index'))
+    //Configuracion global de rutas
+app.use('/api', require('./routes/index'));
+// middlewares swagger
+// app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc(swaggerSpec)));
 
 app.get('/', (req, res) => {
     res.json({
