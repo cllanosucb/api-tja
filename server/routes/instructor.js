@@ -16,7 +16,7 @@ app.get('', async(req, res) => {
     res.json(user);
 })
 
-app.get('/generar/correo/institucional', validSchemaUsuarioInstructor, async(req, res) => {
+app.post('/generar/correo/institucional', validSchemaUsuarioInstructor, async(req, res) => {
     console.log('instructor/generar/correo/institucional');
     console.log('req.body', req.body);
     const { lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal } = req.body;
