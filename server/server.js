@@ -3,11 +3,14 @@ require('dotenv').config();
 const { job_inscripcion } = require('./tools/jobs');
 const CronJob = require('cron').CronJob;
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 // swagger
 const swaggerUI = require('swagger-ui-express');
 const YAML = require('yamljs');
-const swaggerJsDoc = YAML.load(path.join('server', 'api.yaml'));
+// console.log(path.join('server', 'api.yaml'));
+const swaggerJsDoc = YAML.load('api.yaml');
+// const swaggerJsDoc = YAML.load(fs.readFileSync('server/api.yaml', 'utf8'));
 
 const app = express();
 var job = new CronJob(process.env.CRON_TIME1, job_inscripcion);
