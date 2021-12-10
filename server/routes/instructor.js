@@ -222,7 +222,7 @@ emailParams = (lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, s
             Sexo: "" + sexo.toUpperCase() == 'HOMBRE' ? "1" : "2",
             Listas: "",
             Alias: "",
-            Tipo: "1",
+            Tipo: "5",
             EmailPersonal: "" + email_personal,
             DocIdentidad: "" + doc_identidad,
             Cargo: "",

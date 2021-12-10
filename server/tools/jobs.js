@@ -9,28 +9,23 @@ require('dotenv').config();
 const job_inscripcion = async() => {
     console.log("Inicio Job");
     const fecha = moment().format('YYYY-MM-DD');
-
     const listaPagos = await getVerPagoFecha('2021-11-24', fecha);
     // console.log("listaPagos", listaPagos);
     const lista = await listaSinDuplicadosSinEmail(listaPagos);
-    console.log("lista", lista);
-    const cont = await registroUsuario(lista);
-    console.log("cont", cont);
-    /* lista.forEach(async item => {
-        // console.log("item", item);
-        // const insertUsuario = await registrarUsuario(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL, 'institucional', 'pass');
-        // console.log("insertUsuario", insertUsuario);
-        const respCorreo = await generarCorreoInstitucionalInscritos("8" + item.LMS_ID_USUARIO, "71" + item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL);
+    console.log("listaSinDuplicadosSinEmail", lista);
+    lista.forEach(async item => {
+        const respCorreo = await generarCorreoInstitucionalInscritos(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL);
         if (respCorreo.ok) {
-            console.log(respCorreo);
-            const updateUsuarioNeo = await actualizarEmailNeo(respCorreo.datos.Response.Result.Email, item.LMS_ID_USUARIO);
-            const insertInstructor = await registrarInstructor(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL, respCorreo.datos.Response.Result.Email, respCorreo.datos.Response.Result.Password);
+            // console.log(respCorreo);
+            // console.log(respCorreo.datos.Response.Result.Email, respCorreo.datos.Response.Result.Password);
+            const updateUsuarioNeo = await actualizarEmailNeoUsuario(respCorreo.datos.Response.Result.Email, item.LMS_ID_USUARIO);
+            const insertUsuario = await registrarUsuario(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL, respCorreo.datos.Response.Result.Email, respCorreo.datos.Response.Result.Password);
             console.log("updateUsuarioNeo", updateUsuarioNeo);
-            console.log("insertInstructor", insertInstructor);
+            console.log("insertUsuario", insertUsuario);
         } else {
             console.log("respCorreo", respCorreo.error.error);
         }
-    }); */
+    });
     console.log("Fin Job");
 }
 
@@ -58,17 +53,51 @@ getVerPagoFecha = async(fecha_inicio, fecha_fin) => {
 listaSinDuplicadosSinEmail = async(listaPagos) => {
     var hash = {};
     let lista = [];
+    let userIds = "";
     const arrayList = listaPagos.filter(function(current) {
         var exists = !hash[current.LMS_ID_USUARIO];
         hash[current.LMS_ID_USUARIO] = true;
         return exists;
     });
-    arrayList.forEach(item => {
+    /* arrayList.forEach(item => {
+        // userIds = userIds+"&user_ids[]="+item.LMS_ID_USUARIO
         if (item.EMAIL.split('@')[1] != 'online.ucb.edu.bo') { //online.ucb.edu.bo
             lista.push(item);
         }
+    }); */
+    arrayList.forEach(item => {
+        userIds = userIds + "&user_ids[]=" + item.LMS_ID_USUARIO
     });
-    return lista
+    const respNeo = await listaUsuariosNeo(userIds);
+    if (respNeo.ok) {
+        // console.log(respNeo.datos);
+        respNeo.datos.forEach(item => {
+            if (item.email.split('@')[1] != 'online.ucb.edu.bo') { //online.ucb.edu.bo
+                lista.push(arrayList.find(element => element.LMS_ID_USUARIO = item.id));
+            }
+        });
+        return lista;
+    } else {
+        return lista;
+    }
+}
+
+listaUsuariosNeo = async(userIds) => {
+    try {
+        const response = await fetch(`${process.env.URL}/get_users_with_ids?api_key=${process.env.API_KEY}${userIds}`);
+        const lista = await response.json();
+        return {
+            ok: true,
+            datos: lista
+        };
+    } catch (err) {
+        return {
+            ok: false,
+            error: {
+                error: err
+            }
+        };
+    }
 }
 
 generarCorreoInstitucionalInscritos = async(lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal) => {
@@ -189,28 +218,6 @@ emailParamsUsuario = (lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nom
         }
     };
     return params;
-}
-
-registroUsuario = (lista) => {
-    let cont = 0;
-    lista.forEach(async item => {
-        // console.log("item", item);
-        // const insertUsuario = await registrarUsuario(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL, 'institucional', 'pass');
-        // console.log("insertUsuario", insertUsuario);
-        const respCorreo = await generarCorreoInstitucionalInscritos(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL);
-        if (respCorreo.ok) {
-            console.log(respCorreo);
-            console.log(respCorreo.datos.Response.Result.Email, respCorreo.datos.Response.Result.Password);
-            const updateUsuarioNeo = await actualizarEmailNeoUsuario(respCorreo.datos.Response.Result.Email, item.LMS_ID_USUARIO);
-            const insertUsuario = await registrarUsuario(item.LMS_ID_USUARIO, item.CEDULA_IDENTIDAD, item.AP_PATERNO, item.AP_MATERNO, item.NOMBRES, item.GENERO, item.FECHA_NAC, item.EMAIL, respCorreo.datos.Response.Result.Email, respCorreo.datos.Response.Result.Password);
-            cont++;
-            console.log("updateUsuarioNeo", updateUsuarioNeo);
-            console.log("insertUsuario", insertUsuario);
-        } else {
-            console.log("respCorreo", respCorreo.error.error);
-        }
-    });
-    return cont;
 }
 
 module.exports = {
