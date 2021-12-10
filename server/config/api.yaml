@@ -1,0 +1,124 @@
+swagger: "2.0"
+info:
+  description: "Este es un servidor de API REST para la generación de correos institucionales con sub-dominio @online.ucb.edu.bo."
+  version: "1.0.0"
+  title: "Documentación de la API REST"
+  #termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "cllanos@ucb.edu.bo"
+  #license:
+    #name: "Apache 2.0"
+    #url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost:3000"
+#basePath: "/v2"
+tags:
+- name: "Instructor"
+  description: "Aqui puede encontrar las endpont que se vinculan para los instructores"
+schemes:
+- "https"
+- "http"
+paths:
+  /api/instructor/generar/correo/institucional:
+    post:
+      tags:
+      - "Instructor"
+      summary: ""
+      description: "La endpoint registra al instructor en la DB, genera el correo institucional y actualiza los datos en la plataforma NEO"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "En este apartado se debe enviar los parametros indicados a continucación"
+        required: true
+        schema:
+          $ref: "#/definitions/usuario"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/status200"
+        "400":
+          description: "Error operation"
+          schema:
+            $ref: "#/definitions/statusError"
+        "500":
+          description: "Error operation"
+          schema:
+            $ref: "#/definitions/statusError"
+ 
+definitions:
+  usuario:
+    type: "object"
+    properties:
+      lms_id_usuario:
+        type: "integer"
+        description: "identificar del usuario generaro por la plataforma NEO lmsid"
+      doc_identidad:
+        type: "string"
+        description: "Carnet de identidad de usuario"
+      ap_paterno:
+        type: "string"
+        description: "Apellido paterno de usuario"
+      ap_materno:
+        type: "string"
+        description: "Apellido materno de usuario"
+      nombres:
+        type: "string"
+        description: "Nombre(s) del usuario"
+      sexo:
+        type: "string"
+        description: "Sexo de usuario ej. Hombre, Mujer"
+      fecha_nacimiento:
+        type: "string"
+        description: "Fecha de nacimiento de usuario"
+      email_personal:
+        type: "string"
+        description: "Email persoanl de usuario"
+  status200:
+    type: "object"
+    properties:
+      ok:
+        type: "boolean"
+        description: "Estado de la petición true = exitoso, false = fallido"
+      datos_usuario:
+        type: "object"
+        properties:
+          lms_id_usuario:
+            type: "integer"
+            description: "identificar del usuario generaro por la plataforma NEO lmsid"
+          datos_correo: 
+            type: "string"
+            description: "JSON de los datos generados del correo institucional"
+      procesos:
+        type: "object"
+        properties:
+          insertInstructor:
+            type: "string"
+            description: "Cadena que indica el estado de la insersión a DB"
+          usuario:
+            type: "string"
+            description: "JSON de los datos del usuario"
+          updateUsuario:
+            type: "string"
+            description: "Cadena que indica el estado de la actualización a DB"
+          updateUsuarioNeo:
+            type: "string"
+            description: "Cadena que indica el estado de la actualización en la plataforma NEO"
+  statusError:
+    type: "object"
+    properties:
+      ok:
+        type: "boolean"
+        description: "Estado de la petición true = exitoso, false = fallido"
+      error: 
+        type: "object"
+        properties:
+          mensaje:
+            type: "string"
+            description: "Mensaje de error"
+          error:
+            type: "string"
+            description: "JSON del error obtenido"

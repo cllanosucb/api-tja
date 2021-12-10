@@ -51,6 +51,7 @@ app.post('/generar/correo/institucional', validSchemaUsuarioInstructor, async(re
                     ok: false,
                     error: {
                         mensaje: "Error al generar el correo institucional",
+                        error: null,
                         error: respCorreo,
                         usuario
                     }
@@ -61,6 +62,7 @@ app.post('/generar/correo/institucional', validSchemaUsuarioInstructor, async(re
                 ok: false,
                 error: {
                     mensaje: "El usuario ya cuenta con correo institucional",
+                    error: null,
                     insertInstructor,
                     usuario
                 }
