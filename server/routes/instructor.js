@@ -16,6 +16,84 @@ app.get('', async(req, res) => {
     res.json(user);
 })
 
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *      usuario:
+ *          type: object
+ *          properties:
+ *            lms_id_usuario:
+ *              type: integer
+ *              description: identificar del usuario generaro por la plataforma NEO lmsid
+ *            doc_identidad:
+ *              type: string
+ *              description: Carnet de identidad de usuario
+ *            ap_paterno:
+ *              type: string
+ *              description: Apellido paterno de usuario
+ *            ap_materno:
+ *              type: string
+ *              description: Apellido materno de usuario
+ *            nombres:
+ *              type: string
+ *              description: Nombre(s) del usuario
+ *            sexo:
+ *              type: string
+ *              description: Sexo de usuario ej. Hombre, Mujer
+ *            fecha_nacimiento:
+ *              type: string
+ *              description: Fecha de nacimiento de usuario
+ *            email_personal:
+ *              type: string
+ *              description: Email persoanl de usuario
+ *      status200:
+ *          type: "object"
+ *          properties:
+ *            ok:
+ *              type: "boolean"
+ *              description: "Estado de la petición true = exitoso, false = fallido"
+ *            datos_usuario:
+ *              type: "object"
+ *              properties:
+ *                lms_id_usuario:
+ *                  type: "integer"
+ *                  description: "identificar del usuario generaro por la plataforma NEO lmsid"
+ *                datos_correo: 
+ *                  type: "string"
+ *                  description: "JSON de los datos generados del correo institucional"
+ *            procesos:
+ *              type: "object"
+ *              properties:
+ *                insertInstructor:
+ *                  type: "string"
+ *                  description: "Cadena que indica el estado de la insersión a DB"
+ *                usuario:
+ *                  type: "string"
+ *                  description: "JSON de los datos del usuario"
+ *                updateUsuario:
+ *                  type: "string"
+ *                  description: "Cadena que indica el estado de la actualización a DB"
+ *                updateUsuarioNeo:
+ *                  type: "string"
+ *                  description: "Cadena que indica el estado de la actualización en la plataforma NEO"
+ *      statusError:
+ *        type: "object"
+ *        properties:
+ *          ok:
+ *            type: "boolean"
+ *            description: "Estado de la petición true = exitoso, false = fallido"
+ *          error: 
+ *            type: "object"
+ *            properties:
+ *              mensaje:
+ *                type: "string"
+ *                description: "Mensaje de error"
+ *              error:
+ *                type: "string"
+ *                description: "JSON del error obtenido"
+ */
+
 app.post('/generar/correo/institucional', validSchemaUsuarioInstructor, async(req, res) => {
     console.log('instructor/generar/correo/institucional');
     console.log('req.body', req.body);
