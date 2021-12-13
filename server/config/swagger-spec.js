@@ -20,7 +20,7 @@ const swaggerSpec = {
             }
         ]
     },
-    apis: [`${path.join(__dirname, './swagger.yaml')}`]
+    apis: [`${path.join(__dirname, '../routes/*.js')}`]
 }
 
 module.exports = swaggerSpec;
