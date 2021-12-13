@@ -59,12 +59,6 @@ listaSinDuplicadosSinEmail = async(listaPagos) => {
         hash[current.LMS_ID_USUARIO] = true;
         return exists;
     });
-    /* arrayList.forEach(item => {
-        // userIds = userIds+"&user_ids[]="+item.LMS_ID_USUARIO
-        if (item.EMAIL.split('@')[1] != 'online.ucb.edu.bo') { //online.ucb.edu.bo
-            lista.push(item);
-        }
-    }); */
     arrayList.forEach(item => {
         userIds = userIds + "&user_ids[]=" + item.LMS_ID_USUARIO
     });
@@ -72,7 +66,7 @@ listaSinDuplicadosSinEmail = async(listaPagos) => {
     if (respNeo.ok) {
         // console.log(respNeo.datos);
         respNeo.datos.forEach(item => {
-            if (item.email.split('@')[1] != 'online.ucb.edu.bo') { //online.ucb.edu.bo
+            if (item.email.split('@')[1] != 'online.ucb.edu.bo' && item.email.split('@')[1] != 'ucb.edu.bo') { //online.ucb.edu.bo
                 lista.push(arrayList.find(element => element.LMS_ID_USUARIO = item.id));
             }
         });
@@ -169,7 +163,7 @@ registrarUsuario = async(lms_id_usuario, doc_identidad, ap_paterno, ap_materno, 
         conn = await mariaDb.mariaDbConnection();
         const rowsSelect = await conn.query(querySelect, [lms_id_usuario]);
         if (rowsSelect.length == 0) {
-            const rows = await conn.query(queryInsert, [lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo == 1 ? 'Hombre' : 'Mujer', fecha_nacimiento, email_personal, email_institucional, password]);
+            const rows = await conn.query(queryInsert, [lms_id_usuario, doc_identidad, ap_paterno.toUpperCase(), ap_materno.toUpperCase(), nombres.toUpperCase(), sexo == 1 ? 'HOMBRE' : 'MUJER', fecha_nacimiento, email_personal, email_institucional, password]);
             rowsInsert = rows;
         }
         resp = {

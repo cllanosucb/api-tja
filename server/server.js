@@ -8,12 +8,11 @@ const express = require('express');
 // swagger
 const swaggerUI = require('swagger-ui-express');
 const YAML = require('yamljs');
-// console.log(path.join('server', 'api.yaml'));
-const swaggerJsDoc = YAML.load('api.yaml');
+const swaggerJsDoc = YAML.load(path.resolve(__dirname, './api.yaml'));
 // const swaggerJsDoc = YAML.load(fs.readFileSync('server/api.yaml', 'utf8'));
 
 const app = express();
-var job = new CronJob(process.env.CRON_TIME1, job_inscripcion);
+var job = new CronJob(process.env.CRON_TIME, job_inscripcion);
 job.start();
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }))

@@ -89,7 +89,7 @@ registrarInstructor = async(res, lms_id_usuario, doc_identidad, ap_paterno, ap_m
         conn = await mariaDb.mariaDbConnection();
         const rowsSelect = await conn.query(querySelect, [lms_id_usuario]);
         if (rowsSelect.length == 0) {
-            const rows = await conn.query(queryInsert, [lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, sexo, fecha_nacimiento, email_personal]);
+            const rows = await conn.query(queryInsert, [lms_id_usuario, doc_identidad, ap_paterno.toUpperCase(), ap_materno.toUpperCase(), nombres.toUpperCase(), sexo.toUpperCase(), fecha_nacimiento, email_personal]);
             rowsInsert = rows.affectedRows;
         }
         return rowsInsert;
