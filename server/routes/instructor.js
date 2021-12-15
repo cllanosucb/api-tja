@@ -304,7 +304,7 @@ emailParams = (lms_id_usuario, doc_identidad, ap_paterno, ap_materno, nombres, s
             EmailPersonal: "" + email_personal,
             DocIdentidad: "" + doc_identidad,
             Cargo: "",
-            FechaNacimiento: `${fecha_nacimiento != undefined ? moment(date.toISOString()).format('L') : '' }`,
+            FechaNacimiento: `${fecha_nacimiento != undefined ? moment(fecha_nacimiento).format('DD/MM/YYYY') : '' }`,
             DepartamentoAcademico: "",
             Celular: ""
         }
