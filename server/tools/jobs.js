@@ -8,7 +8,7 @@ require('dotenv').config();
 const job_inscripcion = async() => {
     console.log("Inicio Job");
     const fecha = moment().format('YYYY-MM-DD');
-    const listaPagos = await getVerPagoFecha('2021-11-24', fecha);
+    const listaPagos = await getVerPagoFecha(fecha, fecha); //'2021-11-24'
     // console.log("listaPagos", listaPagos);
     const lista = await listaSinDuplicadosSinEmail(listaPagos);
     console.log("listaSinDuplicadosSinEmail", lista);
