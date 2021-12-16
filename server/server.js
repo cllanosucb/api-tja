@@ -11,7 +11,7 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerSpec = require('./config/swagger-spec');
 
 const app = express();
-var job = new CronJob(process.env.CRON_TIME, job_inscripcion);
+var job = new CronJob(process.env.CRON_TIME1, job_inscripcion);
 job.start();
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }))
